@@ -1,0 +1,65 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-video-1",
+      "description": "Children playing soccer in a community sports center",
+      "imageUrl": "https://picsum.photos/seed/sports1/800/600",
+      "imageHint": "community sports"
+    },
+    {
+      "id": "hero-video-2",
+      "description": "Kids participating in an educational workshop",
+      "imageUrl": "https://picsum.photos/seed/workshop1/800/600",
+      "imageHint": "youth workshop"
+    },
+    {
+      "id": "hero-video-3",
+      "description": "Community event with music and laughter",
+      "imageUrl": "https://picsum.photos/seed/event1/800/600",
+      "imageHint": "community event"
+    },
+    {
+      "id": "ruta-sonrisas-hero",
+      "description": "Joyful children in a recreational setting",
+      "imageUrl": "/img/sonrisas1.png",
+      "imageHint": "happy children"
+    },
+    {
+      "id": "enraizando-hero",
+      "description": "Hands planting a small tree in a community garden",
+      "imageUrl": "/img/enraizando.png",
+      "imageHint": "community garden"
+    },
+    {
+      "id": "partner-1",
+      "description": "Partner Logo Placeholder 1",
+      "imageUrl": "https://picsum.photos/seed/logo1/200/100",
+      "imageHint": "abstract logo"
+    },
+    {
+      "id": "partner-2",
+      "description": "Partner Logo Placeholder 2",
+      "imageUrl": "https://picsum.photos/seed/logo2/200/100",
+      "imageHint": "corporate logo"
+    },
+    {
+      "id": "partner-3",
+      "description": "Partner Logo Placeholder 3",
+      "imageUrl": "https://picsum.photos/seed/logo3/200/100",
+      "imageHint": "foundation logo"
+    },
+    {
+      "id": "partner-4",
+      "description": "Partner Logo Placeholder 4",
+      "imageUrl": "https://picsum.photos/seed/logo4/200/100",
+      "imageHint": "nonprofit logo"
+    },
+    {
+      "id": "partner-5",
+      "description": "Partner Logo Placeholder 5",
+      "imageUrl": "https://picsum.photos/seed/logo5/200/100",
+      "imageHint": "institution logo"
+    }
+  ]
+}
