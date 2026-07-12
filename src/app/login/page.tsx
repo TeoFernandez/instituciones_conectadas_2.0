@@ -11,6 +11,8 @@ import {
   XIcon,
   WarningCircleIcon,
   CalendarBlankIcon,
+  CheckCircleIcon,
+  SpinnerGapIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,7 @@ import {
   dateToInputValue,
   inputValueToDate,
   loadEvents,
+  normalizeImageUrl,
   saveEvents,
   type EventItem,
 } from '@/lib/events-store';
@@ -136,14 +139,38 @@ function EventForm({
   onSubmit: (form: FormState) => void;
 }) {
   const [form, setForm] = useState<FormState>(initial);
+  const [imageCheck, setImageCheck] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  const checkImage = (url: string) => {
+    if (!url) {
+      setImageCheck('idle');
+      return;
+    }
+    setImageCheck('checking');
+    const probe = new window.Image();
+    probe.onload = () => setImageCheck('ok');
+    probe.onerror = () => setImageCheck('error');
+    probe.src = url;
+  };
+
+  useEffect(() => {
+    if (initial.image) checkImage(initial.image);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleImageBlur = (raw: string) => {
+    const normalized = normalizeImageUrl(raw);
+    set('image', normalized);
+    checkImage(normalized);
+  };
+
   const handleSubmit = (ev: FormEvent) => {
     ev.preventDefault();
     if (!form.title || !form.programa || !form.date || !form.time || !form.location) return;
-    onSubmit(form);
+    onSubmit({ ...form, image: normalizeImageUrl(form.image) });
   };
 
   return (
@@ -178,8 +205,47 @@ function EventForm({
         </div>
 
         <div className="flex flex-col gap-1.5 md:col-span-2">
-          <Label htmlFor="image">Imagen (opcional, ruta o URL)</Label>
-          <Input id="image" value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="/img-instituciones/enraizando.png" />
+          <Label htmlFor="image">Imagen (opcional, ruta, URL o link de Google Drive)</Label>
+          <div className="flex items-center gap-3">
+            <Input
+              id="image"
+              value={form.image}
+              onChange={(e) => {
+                set('image', e.target.value);
+                setImageCheck('idle');
+              }}
+              onBlur={(e) => handleImageBlur(e.target.value)}
+              placeholder="/img-instituciones/enraizando.png o link de Drive"
+            />
+            {imageCheck === 'ok' && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={form.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 border border-[#001A33]/10" />
+            )}
+          </div>
+
+          {imageCheck === 'checking' && (
+            <span className="flex items-center gap-1.5 text-[11px] text-[#94A3B8] font-body">
+              <SpinnerGapIcon size={12} className="animate-spin" />
+              Comprobando la imagen...
+            </span>
+          )}
+          {imageCheck === 'ok' && (
+            <span className="flex items-center gap-1.5 text-[11px] text-[#22C55E] font-body">
+              <CheckCircleIcon size={12} weight="fill" />
+              Se ve bien, así va a aparecer en el sitio.
+            </span>
+          )}
+          {imageCheck === 'error' && (
+            <span className="flex items-center gap-1.5 text-[11px] text-[#F43F5E] font-body">
+              <WarningCircleIcon size={12} weight="fill" />
+              No pudimos mostrar esta imagen ahora. Puede ser que: el archivo no sea público, esté en un formato no compatible (ej. HEIC de iPhone — convertilo a JPG/PNG antes de subirlo), o si es de Drive, que se haya agotado su cuota de vistas por un rato. Probá guardar igual y revisar el sitio más tarde.
+            </span>
+          )}
+          {imageCheck === 'idle' && (
+            <span className="text-[11px] text-[#94A3B8] font-body">
+              Podés pegar el link de &quot;Compartir&quot; de Google Drive tal cual — se convierte solo. El archivo tiene que estar compartido como &quot;Cualquiera con el enlace&quot;.
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 md:col-span-2">

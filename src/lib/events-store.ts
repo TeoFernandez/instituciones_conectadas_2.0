@@ -116,3 +116,16 @@ export function inputValueToDate(value: string): Date {
   const [y, m, d] = value.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
+
+// Convierte un link de "Compartir" de Google Drive (que sirve una página HTML,
+// no la imagen) al formato que se puede usar directo en un <img src>.
+export function normalizeImageUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed || !trimmed.includes('drive.google.com')) return trimmed;
+
+  const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const id = fileMatch?.[1] ?? idMatch?.[1];
+
+  return id ? `https://drive.google.com/uc?export=view&id=${id}` : trimmed;
+}
