@@ -64,7 +64,7 @@ export const defaultEvents: EventItem[] = [
     color: '#22C55E',
     time: '9:30 hs',
     location: 'Plaza San Martín',
-    image: '/img-instituciones/enraizando.png',
+    image: '/img/enraizando.png',
   },
   {
     id: 'evt-seed-4',
@@ -74,7 +74,7 @@ export const defaultEvents: EventItem[] = [
     color: '#F43F5E',
     time: '15:00 hs',
     location: 'Club Los Andes',
-    image: '/img-instituciones/sonrisas1.png',
+    image: '/img/sonrisas1.png',
   },
   {
     id: 'evt-seed-5',

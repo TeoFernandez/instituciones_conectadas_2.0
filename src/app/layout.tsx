@@ -5,6 +5,11 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Instituciones Conectadas | Red de Transformación Social',
   description: 'Conectamos polideportivos, iglesias y organizaciones sociales para el desarrollo de las infancias.',
+  icons: {
+    icon: '/img/icoIC.png',
+    shortcut: '/img/icoIC.png',
+    apple: '/img/icoIC.png',
+  },
 };
 
 export default function RootLayout({

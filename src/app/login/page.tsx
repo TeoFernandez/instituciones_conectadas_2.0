@@ -264,7 +264,7 @@ function EventForm({
                 setImageCheck('idle');
               }}
               onBlur={(e) => handleImageBlur(e.target.value)}
-              placeholder="/img-instituciones/enraizando.png o link de Drive"
+              placeholder="/img/enraizando.png o link de Drive"
             />
             {imageCheck === 'ok' && (
               // eslint-disable-next-line @next/next/no-img-element

@@ -6,12 +6,14 @@ import { NetworkBackground } from '@/components/NetworkBackground';
 
 const instituciones = [
   { src: '/img-instituciones/losangelitos.png', alt: 'Los Angelitos' },
-  { src: '/img-instituciones/enraizando.png',   alt: 'Enraizando'    },
-  { src: '/img-instituciones/sonrisas1.png',    alt: 'Ruta de Sonrisas' },
+  ...Array.from({ length: 20 }, (_, i) => ({
+    src: `/img-instituciones/${i + 1}.png`,
+    alt: `Institución ${i + 1}`,
+  })),
 ];
 
-// Repetir para llenar el scroll infinito
-const allItems = [...instituciones, ...instituciones, ...instituciones, ...instituciones];
+// 2 copias exactas: el loop se hace saltando -50%, así siempre calza sin corte
+const allItems = [...instituciones, ...instituciones];
 
 export function Partners() {
   return (

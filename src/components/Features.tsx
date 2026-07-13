@@ -54,7 +54,7 @@ const features: {
     actividades: ['Recreación'],
     color: '#F43F5E',
     Icon: UsersThreeIcon,
-    logo: '/img-instituciones/sonrisas1.png',
+    logo: '/img/sonrisas1.png',
   },
   {
     number: '04',
@@ -64,7 +64,7 @@ const features: {
     actividades: ['Ambiente', 'Hábitos'],
     color: '#22C55E',
     Icon: LeafIcon,
-    logo: '/img-instituciones/enraizando.png',
+    logo: '/img/enraizando.png',
   },
   {
     number: '05',
@@ -84,7 +84,7 @@ function EjesCarousel() {
   return (
     <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen mt-6">
       <Carousel opts={{ align: 'start', loop: false }} className="px-6 md:px-16">
-        <CarouselContent className="-ml-6 py-6 justify-center">
+        <CarouselContent className="-ml-6 py-6">
           {features.map((f) => (
             <CarouselItem key={f.number} className="pl-6 basis-auto w-[320px] sm:w-[360px]">
               <div

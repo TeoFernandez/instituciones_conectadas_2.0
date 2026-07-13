@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { ArrowUpRight, Instagram, FileText } from 'lucide-react';
 
-// URL del Google Form al que redirige el botón de contacto (link normal de "viewform", sin embedded=true).
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdexy9cqr9mZ04MiDJj4Aec6sMJZYPh7LCZDgGPpfZcsLd2WQ/viewform';
+// URL del Google Form al que redirige el botón de contacto.
+const GOOGLE_FORM_URL = 'https://forms.gle/qj92cDGKua3oVA65A';
 
 const contactInfo = [
   { Icon: Instagram, text: '@institucionesconectadas', sub: 'Seguinos', color: '#FF9F1C', href: 'https://instagram.com/institucionesconectadas' },

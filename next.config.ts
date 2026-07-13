@@ -1,6 +1,8 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  // Oculta el ícono flotante de Next.js (indicador de dev) en npm run dev.
+  devIndicators: false,
   // Exportación estática: genera HTML/CSS/JS puro en la carpeta out/
   // para subir a un hosting compartido (Hostinger) junto a la carpeta api/ (PHP).
   output: 'export',
