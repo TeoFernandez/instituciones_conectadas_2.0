@@ -1,0 +1,12 @@
+# Esta carpeta solo sirve imágenes — nunca ejecutar código acá.
+<FilesMatch "\.(php|phtml|php\d|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>
+
+# Si PHP corre como módulo de Apache, apagarlo del todo en esta carpeta.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>

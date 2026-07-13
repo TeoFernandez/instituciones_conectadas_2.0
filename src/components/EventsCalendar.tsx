@@ -10,7 +10,7 @@ import {
   ArrowUpRightIcon,
 } from '@phosphor-icons/react';
 import { NetworkBackground } from '@/components/NetworkBackground';
-import { EVENTS_UPDATED_EVENT, MONTH_NAMES, defaultEvents, loadEvents, type EventItem } from '@/lib/events-store';
+import { EVENTS_UPDATED_EVENT, MONTH_NAMES, defaultEvents, fetchEvents, type EventItem } from '@/lib/events-store';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -37,13 +37,17 @@ export function EventsCalendar() {
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const sync = () => setEvents(loadEvents());
+    let active = true;
+    const sync = () => {
+      fetchEvents().then((list) => {
+        if (active) setEvents(list);
+      });
+    };
     sync();
     window.addEventListener(EVENTS_UPDATED_EVENT, sync);
-    window.addEventListener('storage', sync);
     return () => {
+      active = false;
       window.removeEventListener(EVENTS_UPDATED_EVENT, sync);
-      window.removeEventListener('storage', sync);
     };
   }, []);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   LockIcon,
   UserIcon,
@@ -13,20 +13,24 @@ import {
   CalendarBlankIcon,
   CheckCircleIcon,
   SpinnerGapIcon,
+  UploadSimpleIcon,
+  KeyIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { isAuthenticated, login, logout } from '@/lib/auth-store';
+import { isAuthenticated, login, logout, changePassword } from '@/lib/auth-store';
 import {
   MONTH_NAMES,
-  createEventId,
   dateToInputValue,
-  inputValueToDate,
-  loadEvents,
+  fetchEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  uploadImage,
   normalizeImageUrl,
-  saveEvents,
   type EventItem,
+  type EventInput,
 } from '@/lib/events-store';
 
 const COLOR_PRESETS = ['#5273C2', '#2EC4B6', '#22C55E', '#F43F5E', '#FF9F1C'];
@@ -59,10 +63,14 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (ev: FormEvent) => {
+  const handleSubmit = async (ev: FormEvent) => {
     ev.preventDefault();
-    if (login(username, password)) {
+    setLoading(true);
+    const ok = await login(username, password);
+    setLoading(false);
+    if (ok) {
       setError('');
       onSuccess();
     } else {
@@ -120,8 +128,8 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           )}
 
-          <Button type="submit" className="mt-2 bg-[#5273C2] hover:bg-[#435E9F]">
-            Ingresar
+          <Button type="submit" disabled={loading} className="mt-2 bg-[#5273C2] hover:bg-[#435E9F]">
+            {loading ? 'Ingresando…' : 'Ingresar'}
           </Button>
         </form>
       </div>
@@ -140,9 +148,29 @@ function EventForm({
 }) {
   const [form, setForm] = useState<FormState>(initial);
   const [imageCheck, setImageCheck] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  const handleFileSelected = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadError('');
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      set('image', url);
+      checkImage(url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'No se pudo subir la imagen.');
+    } finally {
+      setUploading(false);
+      // Permite volver a elegir el mismo archivo si hizo falta reintentar.
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const checkImage = (url: string) => {
     if (!url) {
@@ -205,8 +233,29 @@ function EventForm({
         </div>
 
         <div className="flex flex-col gap-1.5 md:col-span-2">
-          <Label htmlFor="image">Imagen (opcional, ruta, URL o link de Google Drive)</Label>
+          <Label htmlFor="image">Imagen (opcional — subila desde tu compu o pegá una URL / link de Drive)</Label>
           <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => handleFileSelected(e.target.files?.[0])}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="shrink-0 flex items-center gap-2"
+            >
+              {uploading ? (
+                <SpinnerGapIcon size={16} className="animate-spin" />
+              ) : (
+                <UploadSimpleIcon size={16} weight="bold" />
+              )}
+              {uploading ? 'Subiendo…' : 'Subir imagen'}
+            </Button>
             <Input
               id="image"
               value={form.image}
@@ -223,6 +272,12 @@ function EventForm({
             )}
           </div>
 
+          {uploadError && (
+            <span className="flex items-center gap-1.5 text-[11px] text-[#F43F5E] font-body">
+              <WarningCircleIcon size={12} weight="fill" />
+              {uploadError}
+            </span>
+          )}
           {imageCheck === 'checking' && (
             <span className="flex items-center gap-1.5 text-[11px] text-[#94A3B8] font-body">
               <SpinnerGapIcon size={12} className="animate-spin" />
@@ -241,9 +296,9 @@ function EventForm({
               No pudimos mostrar esta imagen ahora. Puede ser que: el archivo no sea público, esté en un formato no compatible (ej. HEIC de iPhone — convertilo a JPG/PNG antes de subirlo), o si es de Drive, que se haya agotado su cuota de vistas por un rato. Probá guardar igual y revisar el sitio más tarde.
             </span>
           )}
-          {imageCheck === 'idle' && (
+          {imageCheck === 'idle' && !uploadError && (
             <span className="text-[11px] text-[#94A3B8] font-body">
-              Podés pegar el link de &quot;Compartir&quot; de Google Drive tal cual — se convierte solo. El archivo tiene que estar compartido como &quot;Cualquiera con el enlace&quot;.
+              &quot;Subir imagen&quot; acepta JPG, PNG, WEBP o GIF de hasta 5 MB. También podés pegar el link de &quot;Compartir&quot; de Google Drive tal cual — se convierte solo (tiene que estar compartido como &quot;Cualquiera con el enlace&quot;).
             </span>
           )}
         </div>
@@ -286,61 +341,159 @@ function EventForm({
   );
 }
 
+function ChangePasswordForm({ onClose }: { onClose: () => void }) {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [repeat, setRepeat] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async (ev: FormEvent) => {
+    ev.preventDefault();
+    setError('');
+    if (next.length < 8) {
+      setError('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (next !== repeat) {
+      setError('Las contraseñas nuevas no coinciden.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await changePassword(current, next);
+      setDone(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar la contraseña.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="bg-white rounded-[1.5rem] p-6 shadow-[0_10px_30px_-15px_rgba(0,26,51,0.25)] border border-[#001A33]/10 flex items-center justify-between gap-4">
+        <span className="flex items-center gap-2 text-[13px] text-[#22C55E] font-body">
+          <CheckCircleIcon size={18} weight="fill" />
+          Contraseña actualizada. Usala la próxima vez que ingreses.
+        </span>
+        <Button type="button" variant="outline" onClick={onClose}>Cerrar</Button>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-[1.5rem] p-6 shadow-[0_10px_30px_-15px_rgba(0,26,51,0.25)] border border-[#001A33]/10 flex flex-col gap-4"
+    >
+      <h3 className="font-headline font-extrabold text-[#001A33] text-lg">Cambiar contraseña</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-current">Contraseña actual</Label>
+          <Input
+            id="pwd-current"
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-new">Nueva contraseña</Label>
+          <Input
+            id="pwd-new"
+            type="password"
+            autoComplete="new-password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            placeholder="Mínimo 8 caracteres"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-repeat">Repetir nueva contraseña</Label>
+          <Input
+            id="pwd-repeat"
+            type="password"
+            autoComplete="new-password"
+            value={repeat}
+            onChange={(e) => setRepeat(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-2 text-[#F43F5E] text-xs font-body">
+          <WarningCircleIcon size={14} weight="bold" />
+          {error}
+        </div>
+      )}
+
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={saving} className="bg-[#5273C2] hover:bg-[#435E9F]">
+          {saving ? 'Guardando…' : 'Guardar contraseña'}
+        </Button>
+        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+      </div>
+    </form>
+  );
+}
+
 function AdminPanel({ onLogout }: { onLogout: () => void }) {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const reload = async () => {
+    const list = await fetchEvents();
+    setEvents([...list].sort((a, b) => a.date.getTime() - b.date.getTime()));
+  };
 
   useEffect(() => {
-    setEvents(loadEvents());
+    reload();
   }, []);
 
-  const persist = (next: EventItem[]) => {
-    const sorted = [...next].sort((a, b) => a.date.getTime() - b.date.getTime());
-    setEvents(sorted);
-    saveEvents(sorted);
+  const formToInput = (form: FormState): EventInput => ({
+    title: form.title,
+    programa: form.programa,
+    color: form.color,
+    date: form.date,
+    time: form.time,
+    location: form.location,
+    image: form.image || undefined,
+    formUrl: form.formUrl || undefined,
+  });
+
+  const handleCreate = async (form: FormState) => {
+    try {
+      await createEvent(formToInput(form));
+      await reload();
+      setCreating(false);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'No se pudo guardar el evento.');
+    }
   };
 
-  const handleCreate = (form: FormState) => {
-    const newEvent: EventItem = {
-      id: createEventId(),
-      title: form.title,
-      programa: form.programa,
-      color: form.color,
-      date: inputValueToDate(form.date),
-      time: form.time,
-      location: form.location,
-      image: form.image || undefined,
-      formUrl: form.formUrl || undefined,
-    };
-    persist([...events, newEvent]);
-    setCreating(false);
+  const handleUpdate = async (id: string, form: FormState) => {
+    try {
+      await updateEvent(id, formToInput(form));
+      await reload();
+      setEditingId(null);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'No se pudo actualizar el evento.');
+    }
   };
 
-  const handleUpdate = (id: string, form: FormState) => {
-    persist(
-      events.map((e) =>
-        e.id === id
-          ? {
-              ...e,
-              title: form.title,
-              programa: form.programa,
-              color: form.color,
-              date: inputValueToDate(form.date),
-              time: form.time,
-              location: form.location,
-              image: form.image || undefined,
-              formUrl: form.formUrl || undefined,
-            }
-          : e
-      )
-    );
-    setEditingId(null);
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm('¿Eliminar este evento de la agenda?')) return;
-    persist(events.filter((e) => e.id !== id));
+    try {
+      await deleteEvent(id);
+      await reload();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'No se pudo eliminar el evento.');
+    }
   };
 
   return (
@@ -351,11 +504,27 @@ function AdminPanel({ onLogout }: { onLogout: () => void }) {
             <span className="text-[10px] font-headline font-bold uppercase tracking-[0.28em] text-[#5273C2]">Panel privado</span>
             <h1 className="font-headline font-extrabold text-[#001A33] text-3xl mt-1">Agenda de eventos</h1>
           </div>
-          <Button variant="outline" onClick={onLogout} className="flex items-center gap-2">
-            <SignOutIcon size={16} weight="bold" />
-            Salir
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setChangingPassword((v) => !v)}
+              className="flex items-center gap-2"
+            >
+              <KeyIcon size={16} weight="bold" />
+              Cambiar contraseña
+            </Button>
+            <Button variant="outline" onClick={onLogout} className="flex items-center gap-2">
+              <SignOutIcon size={16} weight="bold" />
+              Salir
+            </Button>
+          </div>
         </div>
+
+        {changingPassword && (
+          <div className="mb-6">
+            <ChangePasswordForm onClose={() => setChangingPassword(false)} />
+          </div>
+        )}
 
         {!creating && !editingId && (
           <Button onClick={() => setCreating(true)} className="mb-6 bg-[#5273C2] hover:bg-[#435E9F] flex items-center gap-2">

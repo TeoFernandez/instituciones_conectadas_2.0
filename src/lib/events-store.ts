@@ -1,3 +1,6 @@
+import { apiUrl } from '@/lib/api';
+import { getToken } from '@/lib/auth-store';
+
 export const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -15,12 +18,25 @@ export type EventItem = {
   formUrl?: string;
 };
 
-type StoredEvent = Omit<EventItem, 'date'> & { date: string };
+// Forma en la que viaja un evento por la API (fecha como string 'YYYY-MM-DD').
+type ApiEvent = Omit<EventItem, 'date'> & { date: string };
 
-const STORAGE_KEY = 'ic_events_v1';
+// Datos que se envían al crear/editar (sin la fecha convertida a Date).
+export type EventInput = {
+  title: string;
+  programa: string;
+  color: string;
+  date: string; // 'YYYY-MM-DD'
+  time: string;
+  location: string;
+  image?: string;
+  formUrl?: string;
+};
+
 export const EVENTS_UPDATED_EVENT = 'ic-events-updated';
 
-// Eventos de ejemplo — se usan como base la primera vez que se abre el sitio
+// Eventos de ejemplo — se muestran como respaldo si la API no responde,
+// para que el sitio nunca se vea vacío.
 export const defaultEvents: EventItem[] = [
   {
     id: 'evt-seed-1',
@@ -71,38 +87,105 @@ export const defaultEvents: EventItem[] = [
   },
 ];
 
-function serialize(events: EventItem[]): StoredEvent[] {
-  return events.map((e) => ({
-    ...e,
-    date: `${e.date.getFullYear()}-${String(e.date.getMonth() + 1).padStart(2, '0')}-${String(e.date.getDate()).padStart(2, '0')}`,
-  }));
+function fromApi(e: ApiEvent): EventItem {
+  const [y, m, d] = e.date.split('-').map(Number);
+  return {
+    id: e.id,
+    date: new Date(y, m - 1, d),
+    title: e.title,
+    programa: e.programa,
+    color: e.color,
+    time: e.time,
+    location: e.location,
+    image: e.image ?? undefined,
+    formUrl: e.formUrl ?? undefined,
+  };
 }
 
-function deserialize(stored: StoredEvent[]): EventItem[] {
-  return stored.map((e) => {
-    const [y, m, d] = e.date.split('-').map(Number);
-    return { ...e, date: new Date(y, m - 1, d) };
-  });
+function authHeaders(): Record<string, string> {
+  const token = getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
-export function loadEvents(): EventItem[] {
-  if (typeof window === 'undefined') return defaultEvents;
+/** Trae la lista de eventos desde la API. Si falla, devuelve los de ejemplo. */
+export async function fetchEvents(): Promise<EventItem[]> {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultEvents;
-    const parsed: StoredEvent[] = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return defaultEvents;
-    return deserialize(parsed);
+    const res = await fetch(apiUrl('events.php'), { cache: 'no-store' });
+    const data = await res.json();
+    if (res.ok && data.ok && Array.isArray(data.events)) {
+      return (data.events as ApiEvent[]).map(fromApi);
+    }
+    return defaultEvents;
   } catch {
     return defaultEvents;
   }
 }
 
-export function saveEvents(events: EventItem[]): void {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize(events)));
-  window.dispatchEvent(new Event(EVENTS_UPDATED_EVENT));
+/** Avisa a la página pública que los eventos cambiaron (para refrescar en vivo). */
+function notifyUpdated(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(EVENTS_UPDATED_EVENT));
+  }
 }
+
+/** Crea un evento nuevo (requiere sesión). */
+export async function createEvent(input: EventInput): Promise<EventItem> {
+  const res = await fetch(apiUrl('events.php'), {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(input),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo crear el evento.');
+  notifyUpdated();
+  return fromApi(data.event as ApiEvent);
+}
+
+/** Actualiza un evento existente (requiere sesión). */
+export async function updateEvent(id: string, input: EventInput): Promise<EventItem> {
+  const res = await fetch(apiUrl('events.php'), {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ id, ...input }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo actualizar el evento.');
+  notifyUpdated();
+  return fromApi(data.event as ApiEvent);
+}
+
+/** Sube una imagen desde la computadora del usuario (requiere sesión). Devuelve la URL lista para usar. */
+export async function uploadImage(file: File): Promise<string> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(apiUrl('upload.php'), {
+    method: 'POST',
+    // OJO: sin Content-Type manual — el navegador arma el boundary de multipart solo.
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo subir la imagen.');
+  // La API devuelve una ruta relativa a la carpeta api/ (ej. "uploads/evt-x.jpg").
+  return apiUrl(data.url as string);
+}
+
+/** Elimina un evento (requiere sesión). */
+export async function deleteEvent(id: string): Promise<void> {
+  const res = await fetch(apiUrl(`events.php?id=${encodeURIComponent(id)}`), {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo eliminar el evento.');
+  notifyUpdated();
+}
+
+// ── Helpers de fecha (sin cambios) ──────────────────────────────────────────
 
 export function createEventId(): string {
   return `evt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

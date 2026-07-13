@@ -52,3 +52,10 @@ ui-debug.log
 # local files
 env.txt
 modified.txt
+
+# API PHP — credenciales reales (nunca subir a Git)
+/api/config.php
+
+# Imágenes subidas por los usuarios (contenido, no código)
+/api/uploads/*
+!/api/uploads/.htaccess
