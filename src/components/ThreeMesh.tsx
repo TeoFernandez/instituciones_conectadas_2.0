@@ -152,10 +152,40 @@ function ImageNode({ pos, texture }: { pos: THREE.Vector3; texture: THREE.Textur
 
 // ── Carga texturas + nodos imagen ─────────────────────────────────────────────
 const IMAGE_PATHS = [
-  '/img-nodos/ig1.png',
-  '/img-nodos/ig2.png',
-  '/img-nodos/ig3.png',
-  '/img-nodos/ig4.png',
+  '/img-nodos/nodo-01.png',
+  '/img-nodos/nodo-02.png',
+  '/img-nodos/nodo-03.png',
+  '/img-nodos/nodo-04.jpeg',
+  '/img-nodos/nodo-05.jpeg',
+  '/img-nodos/nodo-06.jpeg',
+  '/img-nodos/nodo-07.jpeg',
+  '/img-nodos/nodo-08.jpeg',
+  '/img-nodos/nodo-09.jpeg',
+  '/img-nodos/nodo-10.jpeg',
+  '/img-nodos/nodo-11.jpeg',
+  '/img-nodos/nodo-12.jpeg',
+  '/img-nodos/nodo-13.jpeg',
+  '/img-nodos/nodo-14.jpeg',
+  '/img-nodos/nodo-15.jpeg',
+  '/img-nodos/nodo-16.jpeg',
+  '/img-nodos/nodo-17.jpeg',
+  '/img-nodos/nodo-18.jpeg',
+  '/img-nodos/nodo-19.jpeg',
+  '/img-nodos/nodo-20.jpeg',
+  '/img-nodos/nodo-21.jpeg',
+  '/img-nodos/nodo-22.jpeg',
+  '/img-nodos/nodo-23.jpeg',
+  '/img-nodos/nodo-24.jpeg',
+  '/img-nodos/nodo-25.jpeg',
+  '/img-nodos/nodo-26.jpeg',
+  '/img-nodos/nodo-27.jpeg',
+  '/img-nodos/nodo-28.jpeg',
+  '/img-nodos/nodo-29.jpeg',
+  '/img-nodos/nodo-30.jpeg',
+  '/img-nodos/nodo-31.jpeg',
+  '/img-nodos/nodo-32.jpeg',
+  '/img-nodos/nodo-33.jpeg',
+  '/img-nodos/nodo-34.jpeg',
 ];
 
 // ── Geometría geodésica compartida ────────────────────────────────────────────
@@ -220,17 +250,23 @@ function getGeoData(): GeoData {
 function ShellImageNodes() {
   const [textures, setTextures] = useState<THREE.Texture[]>([]);
   const { imgPos } = getGeoData();
-  // Asignación aleatoria estable de imagen por nodo
-  const imgIdx = useMemo(() => imgPos.map(() => Math.floor(Math.random() * IMAGE_PATHS.length)), [imgPos]);
   useEffect(() => {
     const loader = new THREE.TextureLoader();
     let alive = true;
-    Promise.all(IMAGE_PATHS.map(
+    Promise.allSettled(IMAGE_PATHS.map(
       url => new Promise<THREE.Texture>((res, rej) => loader.load(url, res, undefined, rej))
-    )).then(txs => { if (alive) setTextures(txs); });
+    )).then(results => {
+      if (!alive) return;
+      const loaded = results
+        .filter((r): r is PromiseFulfilledResult<THREE.Texture> => r.status === 'fulfilled')
+        .map(r => r.value);
+      setTextures(loaded);
+    });
     return () => { alive = false; };
   }, []);
-  if (textures.length < IMAGE_PATHS.length) return null;
+  // Asignación aleatoria estable de imagen por nodo (solo entre las que sí cargaron)
+  const imgIdx = useMemo(() => imgPos.map(() => Math.floor(Math.random() * textures.length)), [imgPos, textures.length]);
+  if (textures.length === 0) return null;
   return (
     <>
       {imgPos.map((pos, i) => (
@@ -282,12 +318,15 @@ const DIAGONAL_AXIS = new THREE.Vector3(0.4, 1, 0.25).normalize();
 
 function Scene() {
   const geoRef = useRef<THREE.Group>(null!);
+  const { size } = useThree();
+  // En mobile el canvas es angosto y la esfera se ve pegada a los bordes — la achicamos un poco.
+  const scale = size.width < 640 ? 0.8 : 1;
 
   useFrame((_, delta) => {
     if (geoRef.current) geoRef.current.rotateOnWorldAxis(DIAGONAL_AXIS, 0.05 * delta);
   });
 
-  return <group ref={geoRef}><GeodesicSphere /></group>;
+  return <group ref={geoRef} scale={scale}><GeodesicSphere /></group>;
 }
 
 // ── Export ────────────────────────────────────────────────────────────────────

@@ -196,7 +196,7 @@ export function Features() {
 
       {/* ── Imagen de fondo ──────────────────────────────────────────────────── */}
       <Image
-        src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=100&w=2400&auto=format&fit=crop&crop=center"
+        src="https://images.unsplash.com/photo-1766932901295-d4185660341b?q=100&w=2400&auto=format&fit=crop&crop=center"
         alt=""
         fill
         className="object-cover object-left"

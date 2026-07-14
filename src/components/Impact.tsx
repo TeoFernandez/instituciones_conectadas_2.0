@@ -12,12 +12,12 @@ const stats = [
 ];
 
 const photos = [
-  { src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?q=95&w=1400&auto=format&fit=crop', alt: 'Chicos en clases de apoyo', label: 'Educación' },
-  { src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=95&w=1400&auto=format&fit=crop', alt: 'Aula con estudiantes', label: 'Educación' },
-  { src: 'https://images.unsplash.com/photo-1777489689168-497290f235d5?q=95&w=1400&auto=format&fit=crop', alt: 'Niños jugando al fútbol en un parque', label: 'Deporte' },
-  { src: 'https://images.unsplash.com/photo-1657664058691-2633847111c4?q=95&w=1400&auto=format&fit=crop', alt: 'Una adulta y una niña cuidando una huerta', label: 'Ambiente' },
-  { src: 'https://images.unsplash.com/photo-1762017576498-38047a90b7e1?q=95&w=1400&auto=format&fit=crop', alt: 'Grupo de chicos sonriendo al aire libre', label: 'Recreación' },
-  { src: 'https://images.unsplash.com/photo-1766932901295-d4185660341b?q=95&w=1400&auto=format&fit=crop', alt: 'Adultos y niños haciendo talleres en comunidad', label: 'Institucional' },
+  { src: '/img-galeria-1/calsesdeapoyo2.jpeg', alt: 'Clases de apoyo', label: 'Clases de apoyo' },
+  { src: '/img-galeria-1/capacitaciones.jpeg', alt: 'Capacitaciones', label: 'Capacitaciones' },
+  { src: '/img-galeria-1/capacitaciones2.jpeg', alt: 'Capacitaciones', label: 'Capacitaciones' },
+  { src: '/img-galeria-1/cine.jpeg', alt: 'Cine', label: 'Cine' },
+  { src: '/img-galeria-1/juegos.jpeg', alt: 'Juegos', label: 'Juegos' },
+  { src: '/img-galeria-1/ambiente.jpeg', alt: 'Ambiente', label: 'Ambiente' },
 ];
 
 function PhotoShowcase() {

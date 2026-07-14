@@ -29,7 +29,7 @@ export function ProposalTool() {
         {/* ── Columna izquierda: imagen ──────────────────────────────────── */}
         <div className="relative h-[320px] sm:h-[420px] lg:h-[520px] rounded-[1.75rem] overflow-hidden">
           <Image
-            src="https://images.unsplash.com/photo-1766932901295-d4185660341b?q=95&w=1400&auto=format&fit=crop"
+            src="/img/seccionContacto.jpeg"
             alt="Adultos y niños haciendo talleres en comunidad"
             fill
             className="object-cover"
