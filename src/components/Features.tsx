@@ -70,7 +70,7 @@ const features: {
     number: '05',
     eje: 'Deporte, Salud e Inclusión',
     objetivo: 'Acercar a niños y niñas al deporte como herramienta de inclusión.',
-    programa: 'Pasitos',
+    programa: 'Mis Pasitos',
     actividades: ['Iniciación Deportiva'],
     color: '#2EC4B6',
     Icon: SneakerIcon,

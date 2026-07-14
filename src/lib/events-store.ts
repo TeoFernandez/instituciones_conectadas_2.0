@@ -42,7 +42,7 @@ export const defaultEvents: EventItem[] = [
     id: 'evt-seed-1',
     date: new Date(2026, 6, 11),
     title: 'Torneo de Iniciación Deportiva',
-    programa: 'Pasitos',
+    programa: 'Mis Pasitos',
     color: '#2EC4B6',
     time: '10:00 hs',
     location: 'Polideportivo Norte',

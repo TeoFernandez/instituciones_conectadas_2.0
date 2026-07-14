@@ -29,8 +29,8 @@ export default function Home() {
 
             {/* Single phrase */}
             <h1
-              className="hero-rise [animation-delay:300ms] font-headline font-extrabold text-[#001A33] leading-[0.88] tracking-tight"
-              style={{ fontSize: 'clamp(56px, 10vw, 120px)' }}
+              className="hero-rise [animation-delay:300ms] font-headline font-extrabold text-[#001A33] leading-[0.88] tracking-tight break-words"
+              style={{ fontSize: 'clamp(2rem, 9vw, 7.5rem)' }}
             >
               Conectamos<br />
               <span className="text-[#5273C2]">instituciones.</span><br />

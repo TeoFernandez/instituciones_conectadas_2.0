@@ -214,7 +214,7 @@ function EventForm({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="programa">Programa</Label>
-          <Input id="programa" value={form.programa} onChange={(e) => set('programa', e.target.value)} placeholder="Pasitos" />
+          <Input id="programa" value={form.programa} onChange={(e) => set('programa', e.target.value)} placeholder="Mis Pasitos" />
         </div>
 
         <div className="flex flex-col gap-1.5">

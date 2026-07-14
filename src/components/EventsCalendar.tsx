@@ -182,12 +182,12 @@ export function EventsCalendar() {
               })}
             </div>
 
-            {/* Flechas */}
+            {/* Flechas — arriba en mobile (el texto vive abajo de la tarjeta), centradas en desktop */}
             <button
               type="button"
               aria-label="Evento anterior"
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-sm text-[#001A33] hover:bg-white hover:scale-105 transition-all duration-200 shadow-lg"
+              className="absolute left-3 top-3 md:left-4 md:top-1/2 md:-translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-sm text-[#001A33] hover:bg-white hover:scale-105 transition-all duration-200 shadow-lg"
             >
               <CaretLeftIcon size={16} weight="bold" />
             </button>
@@ -195,7 +195,7 @@ export function EventsCalendar() {
               type="button"
               aria-label="Evento siguiente"
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-sm text-[#001A33] hover:bg-white hover:scale-105 transition-all duration-200 shadow-lg"
+              className="absolute right-3 top-3 md:right-4 md:top-1/2 md:-translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-sm text-[#001A33] hover:bg-white hover:scale-105 transition-all duration-200 shadow-lg"
             >
               <CaretRightIcon size={16} weight="bold" />
             </button>

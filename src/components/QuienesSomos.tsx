@@ -3,9 +3,9 @@ import Image from 'next/image';
 import { Building2, MapPin, Users } from 'lucide-react';
 
 const stats = [
-  { value: '40+', label: 'Instituciones aliadas', color: '#5273C2', Icon: Building2 },
-  { value: '5',   label: 'Barrios del AMBA',      color: '#FF9F1C', Icon: MapPin    },
-  { value: '2K+', label: 'Chicos alcanzados',     color: '#2EC4B6', Icon: Users     },
+  { value: '113+', label: 'Instituciones afiliadas', color: '#5273C2', Icon: Building2 },
+  { value: '22+',  label: 'Localidades del AMBA',    color: '#FF9F1C', Icon: MapPin    },
+  { value: '12K',  label: 'Población alcanzada',     color: '#2EC4B6', Icon: Users     },
 ];
 
 export function QuienesSomos() {

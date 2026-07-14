@@ -5,10 +5,10 @@ import Image from 'next/image';
 import { NetworkBackground } from '@/components/NetworkBackground';
 
 const stats = [
-  { value: '40+', label: 'Instituciones aliadas', color: '#5273C2' },
-  { value: '5',   label: 'Barrios del AMBA',      color: '#FF9F1C' },
-  { value: '2K+', label: 'Chicos alcanzados',     color: '#2EC4B6' },
-  { value: '150+', label: 'Jornadas realizadas',  color: '#F43F5E' },
+  { value: '113+', label: 'Instituciones afiliadas', color: '#5273C2' },
+  { value: '22+',  label: 'Localidades del AMBA',    color: '#FF9F1C' },
+  { value: '12K',  label: 'Población alcanzada',     color: '#2EC4B6' },
+  { value: '150+', label: 'Jornadas realizadas',     color: '#F43F5E' },
 ];
 
 const photos = [

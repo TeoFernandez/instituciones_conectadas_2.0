@@ -35,7 +35,7 @@ $count = (int) $db->query('SELECT COUNT(*) FROM events')->fetchColumn();
 
 if ($count === 0) {
     $seed = [
-        ['evt-seed-1', 'Torneo de Iniciación Deportiva', 'Pasitos', '#2EC4B6', '2026-07-11', '10:00 hs', 'Polideportivo Norte', null, null],
+        ['evt-seed-1', 'Torneo de Iniciación Deportiva', 'Mis Pasitos', '#2EC4B6', '2026-07-11', '10:00 hs', 'Polideportivo Norte', null, null],
         ['evt-seed-2', 'Jornada de Formación Dirigencial', 'La Universidad en tu Club', '#5273C2', '2026-07-18', '18:00 hs', 'Sede Central', null, null],
         ['evt-seed-3', 'Huerta Comunitaria', 'Enraizando', '#22C55E', '2026-07-25', '9:30 hs', 'Plaza San Martín', '/img-instituciones/enraizando.png', null],
         ['evt-seed-4', 'Jornada Recreativa', 'Ruta de Sonrisas', '#F43F5E', '2026-08-01', '15:00 hs', 'Club Los Andes', '/img-instituciones/sonrisas1.png', null],
