@@ -55,6 +55,7 @@ modified.txt
 
 # API PHP — credenciales reales (nunca subir a Git)
 /api/config.php
+/api/config.hostinger.php
 
 # Imágenes subidas por los usuarios (contenido, no código)
 /api/uploads/*
