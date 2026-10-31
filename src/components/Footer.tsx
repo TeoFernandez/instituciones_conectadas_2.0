@@ -155,25 +155,21 @@ export function Footer() {
           </div>
         </div>
 
-        {/* ── AwenTech ─────────────────────────────────────────────────── */}
+        {/* ── Crédito HELYPS ───────────────────────────────────────────── */}
         <div className="h-px bg-white/10 mb-5" />
         <div className="flex justify-center">
           <Link
-            href="https://www.awentech.com.ar"
+            href="https://helyps.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 opacity-30 hover:opacity-60 transition-all duration-400"
+            className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-2 opacity-50 hover:opacity-100 transition-opacity duration-300"
           >
-            <div className="relative w-5 h-5 shrink-0">
-              <Image
-                src="/img/LogoChicoAwenTech - Sin fondo.png"
-                alt="Awen Tech"
-                fill
-                className="object-contain grayscale invert"
-              />
-            </div>
-            <span className="text-[10px] font-headline font-bold tracking-[0.25em] uppercase text-white/50">
-              Awen Tech
+            <span className="text-[10px] font-headline font-bold tracking-[0.25em] uppercase text-white/70">
+              Desarrollado por
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Image src="/img/helyps-icono-blanco.svg" alt="" width={28} height={20} className="h-5 w-auto" />
+              <Image src="/img/helyps-nombre-blanco.svg" alt="HELYPS" width={63} height={12} className="h-3 w-auto" />
             </span>
           </Link>
         </div>
