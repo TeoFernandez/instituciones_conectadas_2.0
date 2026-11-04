@@ -110,10 +110,12 @@ function authHeaders(): Record<string, string> {
   };
 }
 
-/** Trae la lista de eventos desde la API. Si falla, devuelve los de ejemplo. */
+/** Trae la lista de eventos desde la API. Si falla o tarda más de 10 s, devuelve los de ejemplo. */
 export async function fetchEvents(): Promise<EventItem[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
-    const res = await fetch(apiUrl('events.php'), { cache: 'no-store' });
+    const res = await fetch(apiUrl('events.php'), { cache: 'no-store', signal: controller.signal });
     const data = await res.json();
     if (res.ok && data.ok && Array.isArray(data.events)) {
       return (data.events as ApiEvent[]).map(fromApi);
@@ -121,6 +123,8 @@ export async function fetchEvents(): Promise<EventItem[]> {
     return defaultEvents;
   } catch {
     return defaultEvents;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
